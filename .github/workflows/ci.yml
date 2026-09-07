@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Required for the merge queue. A queued pull request is built on a
+  # `merge_group` ref, and without this trigger the `ci` check never reports
+  # against it -- the entry then sits until the queue's timeout expires and is
+  # dropped. The failure looks like the queue is broken rather than like a
+  # missing trigger.
+  merge_group:
 
 permissions:
   contents: read
