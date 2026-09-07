@@ -1,0 +1,37 @@
+name: Needs decision
+description: Something a session could not settle alone.
+title: "[decision] "
+labels: ["needs-decision"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Raised when proceeding either way would be a guess. State the options
+        fairly, including the one you did not pick.
+  - type: textarea
+    id: question
+    attributes:
+      label: The question
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options considered
+      description: Each with what it costs, not only what it gives.
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+      description: Which one, and why. Say if you are genuinely unsure.
+    validations:
+      required: true
+  - type: textarea
+    id: meanwhile
+    attributes:
+      label: What was done in the meantime
+      description: What state the repository is in now. "Nothing" is a valid answer.
+    validations:
+      required: true

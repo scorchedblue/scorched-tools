@@ -1,0 +1,16 @@
+[workspace]
+resolver = "3"
+members = ["crates/scorched"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.98"
+license = "MIT"
+repository = "https://github.com/scorchedblue/scorched-tools"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }

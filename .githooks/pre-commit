@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+# Staged-secret gate. Runs for every commit regardless of author -- which is the
+# point: an unattended agent must not be able to leak by being in a hurry.
+# `detect` (full history) is CI's job; `protect --staged` is what belongs here,
+# because it is the only form that sees a secret before it becomes a commit.
+set -euo pipefail
+command -v gitleaks >/dev/null || {
+    echo "pre-commit: gitleaks not found -- run 'just setup'" >&2
+    exit 1
+}
+exec gitleaks protect --staged --no-banner --redact

@@ -1,0 +1,47 @@
+name: Backlog item
+description: A unit of work an unattended session can pick up.
+title: "[backlog] "
+labels: ["tier:green"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Set the tier honestly. It decides whether a session may land this
+        without you, and the default label on this form is the *lowest* risk.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What
+      description: One paragraph. What should be true afterwards that is not true now.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How a session knows it is done. Prefer a command and its expected result.
+      placeholder: "`just ci` green, and `just test` asserts the new karg by name."
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Tier
+      options:
+        - "green -- docs, tests, refactors, QML polish, Rust ports with tests"
+        - "yellow -- new dependency, Containerfile, the base, or the session"
+        - "red -- never unattended"
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options: ["P0 founding", "P1 base swap", "P2 terminal", "P3 tools", "P4 theme engine", "P5 shell", "P6 zoom", "P7 publish", "P8 install media", "unsequenced"]
+    validations:
+      required: true
+  - type: input
+    id: blocked_by
+    attributes:
+      label: Blocked by
+      description: Issue reference, or what must happen first. Leave empty if ready.
