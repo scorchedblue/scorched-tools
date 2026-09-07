@@ -23,9 +23,22 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # cache: false is deliberate, and this repository is the reason.
+      #
+      # mise's cache stores its own state, not the rustup toolchain. On a cache
+      # hit mise sees rust as already installed and skips it, so the `components
+      # = "rustfmt,clippy"` in mise.toml is never applied -- and `cargo fmt`
+      # then triggers a lazy rustup fetch with the DEFAULT profile. The good run
+      # downloaded 5 components; every cached run downloaded 3 and failed on
+      # "'cargo-fmt' is not installed".
+      #
+      # It fails only on a cache HIT, so the fix looked correct the one time it
+      # ran fresh. Do not re-enable this without checking that a cached run
+      # still has rustfmt.
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           version: 2026.1.0
+          cache: false
 
       # gitleaks scans history, so the shallow default checkout is not enough.
       - name: Deepen history for the secret scan

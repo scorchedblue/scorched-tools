@@ -8,6 +8,23 @@ body:
       value: |
         Raised when proceeding either way would be a guess. State the options
         fairly, including the one you did not pick.
+
+        **How to answer one:**
+
+        1. Comment with your decision and the reasoning.
+        2. Remove the `needs-decision` label.
+
+        That is the whole flow. These issues already carry a `tier:` label, so
+        removing `needs-decision` is the only action needed to release the work
+        — no second label to remember.
+
+        Your comment becomes the instruction: an unattended session reads the
+        issue **and every comment**, and is told that where a comment
+        contradicts the description, the comment wins. So you do not need to
+        rewrite the body.
+
+        Change the `tier:` label first if the answer turned out bigger or
+        smaller than expected — `tier:red` if it should never run unattended.
   - type: textarea
     id: question
     attributes:
