@@ -1,0 +1,49 @@
+name: Bug report
+description: Something is broken.
+title: "[bug] "
+labels: ["type:bug", "tier:green"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **The `tier:` label decides what happens to this.** This form applies
+        `tier:green`, so an unattended session may pick the bug up and open a
+        fix. Change it to `tier:yellow` if you want to see the pull request
+        before it lands, or `tier:red` to keep hands off entirely.
+
+        A session reads this issue **and its comments** when it starts, so
+        adding detail later works — you do not need to rewrite the description.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: The actual behaviour, not the expected one.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen instead
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: Commands, keystrokes, or the state the machine was in. Say if it is intermittent.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        Logs, `journalctl` output, the failing command's output.
+
+        **Redact before pasting.** These repositories are public.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Image version
+      description: "Output of `rpm-ostree status` or the digest you are running."

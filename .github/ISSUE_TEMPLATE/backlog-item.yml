@@ -6,8 +6,16 @@ body:
   - type: markdown
     attributes:
       value: |
-        Set the tier honestly. It decides whether a session may land this
-        without you, and the default label on this form is the *lowest* risk.
+        **The `tier:` label decides what happens to this, not anything you type
+        below.** This form applies `tier:green`, which means an unattended
+        session may do the work and land it once CI is green.
+
+        Change the label if that is wrong:
+
+        - `tier:yellow` — a session will open a pull request and wait for you.
+        - `tier:red` — never touched unattended.
+
+        Add a `blocked:*` label and it is skipped until you remove it.
   - type: textarea
     id: summary
     attributes:
@@ -24,20 +32,20 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: tier
-    attributes:
-      label: Tier
-      options:
-        - "green -- docs, tests, refactors, QML polish, Rust ports with tests"
-        - "yellow -- new dependency, Containerfile, the base, or the session"
-        - "red -- never unattended"
-    validations:
-      required: true
-  - type: dropdown
     id: phase
     attributes:
       label: Phase
-      options: ["P0 founding", "P1 base swap", "P2 terminal", "P3 tools", "P4 theme engine", "P5 shell", "P6 zoom", "P7 publish", "P8 install media", "unsequenced"]
+      options:
+        - "P0 founding"
+        - "P1 base swap"
+        - "P2 terminal"
+        - "P3 tools"
+        - "P4 theme engine"
+        - "P5 shell"
+        - "P6 zoom"
+        - "P7 publish"
+        - "P8 install media"
+        - "unsequenced"
     validations:
       required: true
   - type: input

@@ -1,0 +1,48 @@
+name: Feature request
+description: Something should exist that does not.
+title: "[feature] "
+labels: ["type:feature", "tier:yellow"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **The `tier:` label decides what happens to this.** This form applies
+        `tier:yellow`, so an unattended session will open a pull request and
+        wait for you rather than landing it — new capability usually deserves a
+        look before it ships. Change it to `tier:green` if you would rather it
+        land on green CI.
+
+        A session reads this issue **and its comments** when it starts, so you
+        can refine the idea in a comment instead of rewriting the description.
+  - type: textarea
+    id: want
+    attributes:
+      label: What should exist
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What is awkward or impossible today. The problem, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: Rough shape, if you have one
+      description: Optional. Say if you would rather leave the approach open.
+  - type: dropdown
+    id: fits
+    attributes:
+      label: Does this fit the project's direction?
+      description: |
+        ScorchedBlue is keyboard-driven and terminal-first, everything custom is
+        Rust, and everything visible shares one palette. Things that cut against
+        that need a reason.
+      options:
+        - "Yes -- it follows directly from the stated direction"
+        - "Mostly -- worth a look but not obviously in scope"
+        - "No -- this deliberately cuts against it, and here is why"
+    validations:
+      required: true
