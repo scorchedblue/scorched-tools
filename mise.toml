@@ -4,6 +4,9 @@
 # toolchain is pinned here and nowhere else. CI reads the same file through
 # jdx/mise-action, so local and CI agree by construction.
 [tools]
-rust = "1.98.0"
+# rustfmt and clippy are NOT in mise's default Rust install, and `just lint`
+# needs both. Without this, CI fails on `cargo fmt --check` with
+# "'cargo-fmt' is not installed for the toolchain".
+rust = { version = "1.98.0", components = "rustfmt,clippy" }
 just = "1.57.0"
 gitleaks = "8.30.1"
