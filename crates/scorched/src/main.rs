@@ -3,17 +3,38 @@
 //! Recipes orchestrate; this binary works. A `ujust` recipe stays a few lines
 //! calling a subcommand, so that parsing, error handling and state live here
 //! where they can be tested.
-//!
-//! The subcommands themselves arrive with P3. This is deliberately a skeleton:
-//! the repository exists now so that CI, the ruleset and the issue queue are
-//! in place before there is code worth guarding.
+
+use std::process::ExitCode;
+
+mod apps;
 
 fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 
-fn main() {
-    println!("scorched {}", version());
+/// Prints the launcher's `.desktop` entries as JSON, the `apps` subcommand.
+fn run_apps() {
+    let dirs = apps::default_data_dirs();
+    let path_var = std::env::var("PATH").unwrap_or_default();
+    let entries = apps::scan(&dirs, &path_var);
+    println!("{}", apps::to_json(&entries));
+}
+
+fn main() -> ExitCode {
+    match std::env::args().nth(1).as_deref() {
+        None => {
+            println!("scorched {}", version());
+            ExitCode::SUCCESS
+        }
+        Some("apps") => {
+            run_apps();
+            ExitCode::SUCCESS
+        }
+        Some(other) => {
+            eprintln!("scorched: unknown subcommand '{other}'");
+            ExitCode::FAILURE
+        }
+    }
 }
 
 #[cfg(test)]
