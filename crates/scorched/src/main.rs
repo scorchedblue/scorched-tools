@@ -10,6 +10,7 @@ mod apps;
 mod audio_levels;
 mod brew_setup;
 mod greeter;
+mod palette;
 mod performance;
 mod screen_power;
 
@@ -39,6 +40,7 @@ fn main() -> ExitCode {
         Some("audio-levels") => audio_levels::run(args.next().as_deref()),
         Some("screen-power") => screen_power::run(args.next().as_deref()),
         Some("greeter") => greeter::run(),
+        Some("palette") => palette::run(args.next().as_deref(), args.next().as_deref()),
         Some("performance") => performance::run(),
         Some("brew-setup") => brew_setup::run(),
         Some(other) => {

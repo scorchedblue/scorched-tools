@@ -1,0 +1,12 @@
+# Scorched Dark -- the default ScorchedBlue palette. See crates/scorched/src/palette.rs for the schema this file follows.
+name = "Scorched Dark"
+slug = "scorched-dark"
+
+[colors]
+background = "#11151cff"
+foreground = "#cdd6f4ff"
+accent = "#5aa9e6ff"
+muted = "#4b5262ff"
+error = "#f38ba8ff"
+warning = "#f9e2afff"
+success = "#a6e3a1ff"
