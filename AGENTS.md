@@ -23,11 +23,25 @@ here**. `cargo check` and `cargo clippy` do not link and work fine, which is why
 Do not "fix" this by layering a compiler into the image. A build toolchain is
 not something that needs to work before login or as root.
 
-**Unsettled, and a P3 decision:** these binaries ship into `/usr`, so they must
-be built against the image's glibc rather than against whatever a developer
-machine has. Building in a container stage -- the pattern the image's
-Containerfile already uses for Quickshell -- is the likely answer, but it has
-not been decided. Do not pick one silently.
+## How the binaries reach the image
+
+Settled in issue #1. These binaries ship into `/usr`, so they must not be built
+against whatever glibc a developer machine happens to have. `just build`
+cross-compiles to `x86_64-unknown-linux-musl`, statically linked, which removes
+the glibc question rather than answering it.
+
+The `release` workflow runs on a `v*` tag, calls `just dist`, and publishes the
+binary plus a `SHA256SUMS` file. **The image vendors that published binary by
+pinned hash**, the way it already vendors starship and mise -- so the image
+build never grows a Rust toolchain and never waits on a Rust compile.
+
+The rejected alternative was a builder stage in the image's Containerfile, the
+Quickshell pattern. Correct by construction, but it puts a compile on the
+critical path of every image build.
+
+The cost accepted here is that a version now lives in two places, the tag and
+`Cargo.toml`. The release workflow fails if they disagree; do not weaken that
+check.
 
 ## Dependencies
 
