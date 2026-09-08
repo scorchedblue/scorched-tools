@@ -7,6 +7,8 @@
 use std::process::ExitCode;
 
 mod apps;
+mod audio_levels;
+mod screen_power;
 
 fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
@@ -21,7 +23,8 @@ fn run_apps() {
 }
 
 fn main() -> ExitCode {
-    match std::env::args().nth(1).as_deref() {
+    let mut args = std::env::args();
+    match args.nth(1).as_deref() {
         None => {
             println!("scorched {}", version());
             ExitCode::SUCCESS
@@ -30,6 +33,8 @@ fn main() -> ExitCode {
             run_apps();
             ExitCode::SUCCESS
         }
+        Some("audio-levels") => audio_levels::run(args.next().as_deref()),
+        Some("screen-power") => screen_power::run(args.next().as_deref()),
         Some(other) => {
             eprintln!("scorched: unknown subcommand '{other}'");
             ExitCode::FAILURE
