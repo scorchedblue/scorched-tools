@@ -1,0 +1,12 @@
+# Scorched Light -- a light counterpart to Scorched Dark. See crates/scorched/src/palette.rs for the schema this file follows.
+name = "Scorched Light"
+slug = "scorched-light"
+
+[colors]
+background = "#f4f6fbff"
+foreground = "#1b1f27ff"
+accent = "#1f6fb2ff"
+muted = "#a9b1c3ff"
+error = "#c4314bff"
+warning = "#a6740bff"
+success = "#2f7d4fff"
