@@ -8,6 +8,9 @@ use std::process::ExitCode;
 
 mod apps;
 mod audio_levels;
+mod brew_setup;
+mod greeter;
+mod performance;
 mod screen_power;
 
 fn version() -> &'static str {
@@ -35,6 +38,9 @@ fn main() -> ExitCode {
         }
         Some("audio-levels") => audio_levels::run(args.next().as_deref()),
         Some("screen-power") => screen_power::run(args.next().as_deref()),
+        Some("greeter") => greeter::run(),
+        Some("performance") => performance::run(),
+        Some("brew-setup") => brew_setup::run(),
         Some(other) => {
             eprintln!("scorched: unknown subcommand '{other}'");
             ExitCode::FAILURE
