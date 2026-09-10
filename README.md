@@ -31,7 +31,8 @@ just dist    # the release assets; needs a linker
 
 ## How this ships
 
-A `v*` tag runs the `release` workflow, which publishes a static
+A `v*` tag runs the `release` workflow. It runs `just ci` first, so a tag at a
+commit that does not pass publishes nothing. It then publishes a static
 `x86_64-unknown-linux-musl` binary and a `SHA256SUMS` file. The image vendors
 that binary by pinned hash, as it already does for starship and mise, so an
 image build needs no Rust toolchain. Tag and `Cargo.toml` version must agree --
