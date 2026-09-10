@@ -1,0 +1,53 @@
+name: sonar
+
+# SonarCloud analysis, deliberately NOT part of `just ci`.
+#
+# The rule in AGENTS.md is that `just ci` is what CI runs and the two must not
+# drift. A Sonar scan needs an organisation token and a vendor action, neither
+# of which a developer can run from the justfile, so folding it into `ci` would
+# break that identity rather than preserve it. It lives here instead and `ci` is
+# untouched.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # NOT named `ci`. The default-branch ruleset requires a check called `ci` from
+  # the GitHub Actions app; a second job by that name would report against the
+  # same required check and make the gate ambiguous.
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 because Sonar attributes issues to commits. A shallow
+      # checkout leaves it unable to tell new code from old, which is what the
+      # quality gate is measured against.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Sonar's Rust analyser runs Clippy itself rather than importing a report,
+      # so cargo and clippy must exist on the runner before the scan.
+      #
+      # cache: false for the same reason ci.yml documents at length: on a cache
+      # hit mise skips the rust install and the `components = "rustfmt,clippy"`
+      # pin in mise.toml is never applied. Read that comment before changing it.
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.1.0
+          cache: false
+
+      # Configuration lives in sonar-project.properties, which the action reads
+      # from the repository root. SONAR_HOST_URL is not set: it is required for
+      # a self-hosted server and wrong for SonarQube Cloud.
+      - uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
