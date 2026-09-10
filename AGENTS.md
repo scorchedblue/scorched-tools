@@ -49,6 +49,11 @@ announced itself at tag time -- publicly, mid-release. Running it per pull
 request moves that failure to review. Do not drop it from `ci` to save a
 cross-compile.
 
+The release workflow runs `just ci`, not `just dist`. A tag can be pushed at any
+commit, including one that never passed, and publishing an asset built from a
+tree nobody gated is the thing a release process exists to prevent. Because `ci`
+ends in `dist`, proving the tree also produces the assets -- one build, not two.
+
 ## Dependencies
 
 There are none yet, which is why no dependency auditor runs. Adding the first

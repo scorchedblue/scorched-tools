@@ -45,8 +45,17 @@ jobs:
             exit 1
           fi
 
-      # The same recipe a human runs to reproduce an asset and check its hash.
-      - run: just dist
+      # gitleaks scans history, so the shallow default checkout is not enough.
+      # Same reason as in ci.yml.
+      - name: Deepen history for the secret scan
+        run: git fetch --unshallow || true
+
+      # `just ci`, not `just dist`. A tag can be pushed at any commit, including
+      # one that never passed, and publishing an asset built from a tree nobody
+      # gated is exactly the thing a release process exists to prevent. `ci`
+      # ends in `dist`, so this produces the assets as a side effect of proving
+      # the tree -- one build, not two.
+      - run: just ci
 
       - name: Publish
         env:
