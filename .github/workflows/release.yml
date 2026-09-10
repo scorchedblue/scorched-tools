@@ -1,0 +1,55 @@
+name: release
+
+# How these binaries reach the image, settled in issue #1: this repository
+# publishes a static musl binary and its checksum, and the image vendors that
+# by pinned hash the same way it already vendors starship and mise. The image
+# build therefore never grows a Rust toolchain, and nothing here depends on the
+# glibc of whatever machine built it.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      # Creating the release and uploading the assets the image pins.
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # cache: false is deliberate here for the same reason as in ci.yml -- a
+      # cache hit makes mise skip the rust install and silently drop the
+      # components in mise.toml. Read the long comment there before changing it.
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.1.0
+          cache: false
+
+      # A release process means the version now lives in two places -- the tag
+      # and Cargo.toml -- which is the cost this approach was chosen with. Fail
+      # loudly rather than publish an asset that reports a version disagreeing
+      # with the tag the image pins.
+      - name: Check the tag matches the crate version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          crate=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name == "scorched") | .version')
+          if [ "$TAG" != "v$crate" ]; then
+            echo "tag $TAG does not match crate version $crate" >&2
+            exit 1
+          fi
+
+      # The same recipe a human runs to reproduce an asset and check its hash.
+      - run: just dist
+
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --generate-notes dist/*

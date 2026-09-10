@@ -26,7 +26,16 @@ just setup   # install pinned tooling, wire the pre-commit hook
 just lint    # fmt --check, check, clippy -D warnings
 just test    # needs a linker; see AGENTS.md
 just ci      # everything CI runs
+just dist    # the release assets; needs a linker
 ```
+
+## How this ships
+
+A `v*` tag runs the `release` workflow, which publishes a static
+`x86_64-unknown-linux-musl` binary and a `SHA256SUMS` file. The image vendors
+that binary by pinned hash, as it already does for starship and mise, so an
+image build needs no Rust toolchain. Tag and `Cargo.toml` version must agree --
+the workflow refuses to publish otherwise.
 
 ## Related repositories
 
