@@ -43,6 +43,12 @@ The cost accepted here is that a version now lives in two places, the tag and
 `Cargo.toml`. The release workflow fails if they disagree; do not weaken that
 check.
 
+**`just ci` runs `dist`, and that is the point.** The release workflow was once
+the only caller, which meant a release path that had stopped building would have
+announced itself at tag time -- publicly, mid-release. Running it per pull
+request moves that failure to review. Do not drop it from `ci` to save a
+cross-compile.
+
 ## Dependencies
 
 There are none yet, which is why no dependency auditor runs. Adding the first

@@ -58,4 +58,11 @@ clean:
     cargo clean
     rm -rf dist
 
-ci: lint secrets test
+# `dist` is in here deliberately. The release workflow is the only thing that
+# ever ran it, so a release path that had stopped building would have failed at
+# tag time -- publicly, mid-release, with nothing else going on to explain it.
+# Running it per pull request moves that failure to review, where it is cheap.
+#
+# It costs one cross-compile. The crate has no dependencies, so that is seconds;
+# if it ever stops being seconds, that is worth knowing too.
+ci: lint secrets test dist
