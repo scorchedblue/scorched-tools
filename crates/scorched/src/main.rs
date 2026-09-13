@@ -13,6 +13,7 @@ mod greeter;
 mod palette;
 mod performance;
 mod screen_power;
+mod theme;
 
 fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
@@ -42,6 +43,7 @@ fn main() -> ExitCode {
         Some("greeter") => greeter::run(),
         Some("palette") => palette::run(args.next().as_deref(), args.next().as_deref()),
         Some("performance") => performance::run(),
+        Some("theme") => theme::run(args.next().as_deref(), args.next().as_deref()),
         Some("brew-setup") => brew_setup::run(),
         Some(other) => {
             eprintln!("scorched: unknown subcommand '{other}'");
