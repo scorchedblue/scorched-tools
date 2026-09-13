@@ -11,9 +11,9 @@ and state belong here, where they can be tested.
 | --- | --- | --- |
 | `scorched` | The CLI. `ujust` recipes call subcommands | skeleton |
 
-Sequenced but not yet written: the theme engine, and the helpers the Quickshell
-shell currently spawns as shell scripts per interaction -- `.desktop` parsing on
-the launcher's hot path, audio levels, screen power.
+Sequenced but not yet written: the helpers the Quickshell shell currently
+spawns as shell scripts per interaction -- `.desktop` parsing on the
+launcher's hot path, audio levels, screen power.
 
 Deliberately **not** here: the image's build scripts. They run inside a
 Containerfile, so porting them would mean compiling a binary during the build in
