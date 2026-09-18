@@ -1,11 +1,26 @@
 //! `theme set <name>` -- writes the theme state and fans the palette out to
 //! every target, for the `theme` subcommand.
 //!
-//! # The targets are not six of a kind
+//! # Only one target is wired up today
 //!
-//! Five targets take the whole palette, live: Quickshell (QML file watching,
-//! free), starship (re-reads per prompt, free), Hyprland (`hyprctl reload`),
-//! tmux (`tmux source-file`) and Ghostty (`SIGUSR2`).
+//! Five targets are *designed* to take the whole palette live: Quickshell (QML
+//! file watching, free), starship (re-reads per prompt, free), Hyprland
+//! (`hyprctl reload`), tmux (`tmux source-file`) and Ghostty (`SIGUSR2`). The
+//! mechanisms are all real and all verified.
+//!
+//! **None of them is connected.** [`write_state`] renders the palette to
+//! `theme.css` and `theme.env`, and nothing in this project reads either file:
+//! Quickshell's `Theme.qml` hardcodes its colours, `/etc/starship.toml` has no
+//! `SCORCHED_` reference, and Hyprland, tmux and Ghostty parse neither CSS nor
+//! shell assignments. Until a renderer exists per target, and the shipped
+//! configs read what it writes, those five get [`Outcome::Unrendered`] and no
+//! dispatch at all -- see #20.
+//!
+//! They used to be reported as `Reloaded`. Three of them re-read a config this
+//! command had not touched; the other two were the literal constant
+//! `Outcome::Reloaded`. `theme set` said six of six targets took the palette
+//! and the screen did not change, which is the exact failure the rest of this
+//! header was written to prevent.
 //!
 //! GTK/Qt cannot. GTK does not watch `~/.config/gtk-4.0/gtk.css` (open
 //! upstream request, GNOME/gtk#3409), and neither `qt6ct` nor Kvantum is in
@@ -122,7 +137,23 @@ enum Outcome {
     Reloaded,
     /// There was nothing to reload. Visible in the report, but not a
     /// failure: this is not a desktop that half-changed.
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "only dispatch_ghostty produces this, and it is not called until the renderers land (#20)"
+        )
+    )]
     Skipped(String),
+    /// No renderer writes anything this target can read, so there was nothing
+    /// to reload and no dispatch was attempted. Distinct from `Skipped`, which
+    /// means the target was absent from the session -- this one is present and
+    /// willing, and we have nothing to give it.
+    ///
+    /// Not a `Failed`: the run did what it is currently able to do, and the
+    /// state files it wrote are correct. It fails no exit code. It is loud in
+    /// the report because a silent one is how this went unnoticed (#20).
+    Unrendered,
     /// A dispatch was attempted and did not go through. The only outcome
     /// that fails the exit code.
     Failed(String),
@@ -297,6 +328,13 @@ fn pids_named(name: &str) -> Vec<u32> {
         .collect()
 }
 
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "kept for the renderer work in #20; nothing is rendered for these targets yet, so dispatch_all does not call them"
+    )
+)]
 fn dispatch_hyprland(run: &mut impl FnMut(&str, &[&str]) -> io::Result<bool>) -> Outcome {
     match run("hyprctl", &["reload"]) {
         Ok(true) => Outcome::Reloaded,
@@ -305,6 +343,13 @@ fn dispatch_hyprland(run: &mut impl FnMut(&str, &[&str]) -> io::Result<bool>) ->
     }
 }
 
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "kept for the renderer work in #20; nothing is rendered for these targets yet, so dispatch_all does not call them"
+    )
+)]
 fn dispatch_tmux(path: &Path, run: &mut impl FnMut(&str, &[&str]) -> io::Result<bool>) -> Outcome {
     let path = path.to_string_lossy();
     match run("tmux", &["source-file", &path]) {
@@ -316,6 +361,13 @@ fn dispatch_tmux(path: &Path, run: &mut impl FnMut(&str, &[&str]) -> io::Result<
     }
 }
 
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "kept for the renderer work in #20; nothing is rendered for these targets yet, so dispatch_all does not call them"
+    )
+)]
 fn dispatch_ghostty(
     pids: &[u32],
     run: &mut impl FnMut(&str, &[&str]) -> io::Result<bool>,
@@ -377,12 +429,26 @@ fn dispatch_all(
     ghostty_pids: &[u32],
     mut run: impl FnMut(&str, &[&str]) -> io::Result<bool>,
 ) -> Vec<(Target, Outcome)> {
+    // Only GTK/Qt is dispatched, because it is the only target anything is
+    // actually rendered for. `write_state` emits `theme.css` and `theme.env`;
+    // nothing in this project reads either -- Quickshell's Theme.qml hardcodes
+    // its colours, /etc/starship.toml contains no SCORCHED_ reference, and
+    // Hyprland, tmux and Ghostty parse neither CSS nor shell assignments.
+    //
+    // Dispatching to them anyway is worse than doing nothing: `hyprctl reload`
+    // re-reads a config this command did not touch, reports success, and the
+    // colours do not change. Quickshell and starship did not even dispatch --
+    // they were the literal constant `Outcome::Reloaded`.
+    //
+    // The dispatch functions below are kept, and stay tested: they are correct
+    // and they are what the renderers will need. See #20 for the renderer work.
+    let _ = (tmux_conf, ghostty_pids, &mut run);
     vec![
-        (Target::Quickshell, Outcome::Reloaded),
-        (Target::Starship, Outcome::Reloaded),
-        (Target::Hyprland, dispatch_hyprland(&mut run)),
-        (Target::Tmux, dispatch_tmux(tmux_conf, &mut run)),
-        (Target::Ghostty, dispatch_ghostty(ghostty_pids, &mut run)),
+        (Target::Quickshell, Outcome::Unrendered),
+        (Target::Starship, Outcome::Unrendered),
+        (Target::Hyprland, Outcome::Unrendered),
+        (Target::Tmux, Outcome::Unrendered),
+        (Target::Ghostty, Outcome::Unrendered),
         (Target::GtkQt, dispatch_gtk_qt(palette, &mut run)),
     ]
 }
@@ -396,6 +462,7 @@ fn format_report(palette: &Palette, report: &[(Target, Outcome)]) -> String {
         };
         let status = match outcome {
             Outcome::Reloaded => "reloaded".to_string(),
+            Outcome::Unrendered => "NOT APPLIED: no renderer for this target yet".to_string(),
             Outcome::Skipped(reason) => format!("skipped: {reason}"),
             Outcome::Failed(reason) => format!("failed: {reason}"),
         };
@@ -689,19 +756,56 @@ mod tests {
     fn a_failed_target_fails_the_whole_dispatch_but_others_still_run() {
         let palette = builtin_palette("scorched-dark").unwrap();
         let tmux_conf = Path::new("/home/napalm/.tmux.conf");
+        // gtk/qt is the only dispatched target while the renderers are missing,
+        // so it is the only one that can fail. This asserts the shape that
+        // matters -- a failing dispatch is reported as Failed and does not stop
+        // the rest of the report being produced -- rather than asserting which
+        // target happens to be dispatched today.
         let report = dispatch_all(&palette, tmux_conf, &[], |program, _| {
-            Ok(program != "hyprctl")
+            Ok(program != "gsettings")
         });
-        let hyprland = report
+        let gtk_qt = report
             .iter()
-            .find(|(target, _)| *target == Target::Hyprland)
+            .find(|(target, _)| *target == Target::GtkQt)
             .unwrap();
-        assert!(matches!(hyprland.1, Outcome::Failed(_)));
-        let tmux = report
-            .iter()
-            .find(|(target, _)| *target == Target::Tmux)
-            .unwrap();
-        assert_eq!(tmux.1, Outcome::Reloaded);
+        assert!(matches!(gtk_qt.1, Outcome::Failed(_)));
+        assert_eq!(report.len(), 6, "every target is still reported");
+    }
+
+    #[test]
+    fn the_unrendered_targets_do_not_claim_a_palette_they_never_received() {
+        let palette = builtin_palette("scorched-dark").unwrap();
+        let tmux_conf = Path::new("/home/napalm/.tmux.conf");
+        // The bug in #20: five targets reported "reloaded" while nothing was
+        // ever rendered into a format any of them reads. Two of them did not
+        // even dispatch -- they were the literal constant Outcome::Reloaded.
+        let mut dispatched: Vec<String> = Vec::new();
+        let report = dispatch_all(&palette, tmux_conf, &[1234], |program, _| {
+            dispatched.push(program.to_string());
+            Ok(true)
+        });
+        for target in [
+            Target::Quickshell,
+            Target::Starship,
+            Target::Hyprland,
+            Target::Tmux,
+            Target::Ghostty,
+        ] {
+            let entry = report.iter().find(|(t, _)| *t == target).unwrap();
+            assert_eq!(
+                entry.1,
+                Outcome::Unrendered,
+                "{} must not claim a palette landed",
+                target.label()
+            );
+        }
+        // And nothing is dispatched on their behalf: reloading a config this
+        // command never wrote is what made the false report look true.
+        assert_eq!(
+            dispatched,
+            vec!["gsettings".to_string(), "gsettings".to_string()],
+            "only gtk/qt should be dispatched"
+        );
     }
 
     #[test]
