@@ -6,8 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        **The `tier:` label decides what happens to this.** This form applies
-        `tier:yellow`, so an unattended session will open a pull request and
+        **The `tier:` label decides how much review this needs.** This form
+        applies `tier:yellow`, so a session will open a pull request and
         wait for you rather than landing it — new capability usually deserves a
         look before it ships. Change it to `tier:green` if you would rather it
         land on green CI.

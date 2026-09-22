@@ -6,8 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        **The `tier:` label decides what happens to this.** This form applies
-        `tier:green`, so an unattended session may pick the bug up and open a
+        **The `tier:` label decides how much review this needs.** This form
+        applies `tier:green`, so a session may pick the bug up and open a
         fix. Change it to `tier:yellow` if you want to see the pull request
         before it lands, or `tier:red` to keep hands off entirely.
 

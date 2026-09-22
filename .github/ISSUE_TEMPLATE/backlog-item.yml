@@ -1,19 +1,19 @@
 name: Backlog item
-description: A unit of work an unattended session can pick up.
+description: A unit of work, ready for a session to pick up.
 title: "[backlog] "
 labels: ["tier:green"]
 body:
   - type: markdown
     attributes:
       value: |
-        **The `tier:` label decides what happens to this, not anything you type
-        below.** This form applies `tier:green`, which means an unattended
-        session may do the work and land it once CI is green.
+        **The `tier:` label decides how much review this needs, not anything you
+        type below.** This form applies `tier:green`, which means a session may
+        do the work and land it once CI is green.
 
         Change the label if that is wrong:
 
         - `tier:yellow` — a session will open a pull request and wait for you.
-        - `tier:red` — never touched unattended.
+        - `tier:red` — never taken by a session at all.
 
         Add a `blocked:*` label and it is skipped until you remove it.
   - type: textarea

@@ -59,10 +59,10 @@ ends in `dist`, proving the tree also produces the assets -- one build, not two.
 There are none yet, which is why no dependency auditor runs. Adding the first
 dependency means adding `cargo-deny` in the same change, not later.
 
-## Unattended sessions
+## Agent sessions
 
-Work may be picked up by an unattended agent from the issue queue. The landing
-path is a pull request with auto-merge, never a push to `main`.
+Work is picked up from the issue queue. The landing path is a pull request,
+never a push to `main`.
 
 **Never, at any authority level:**
 
