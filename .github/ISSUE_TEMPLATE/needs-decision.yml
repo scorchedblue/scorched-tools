@@ -18,13 +18,13 @@ body:
         removing `needs-decision` is the only action needed to release the work
         — no second label to remember.
 
-        Your comment becomes the instruction: an unattended session reads the
+        Your comment becomes the instruction: a session reads the
         issue **and every comment**, and is told that where a comment
         contradicts the description, the comment wins. So you do not need to
         rewrite the body.
 
         Change the `tier:` label first if the answer turned out bigger or
-        smaller than expected — `tier:red` if it should never run unattended.
+        smaller than expected — `tier:red` if no session should take it.
   - type: textarea
     id: question
     attributes:
